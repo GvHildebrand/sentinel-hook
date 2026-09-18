@@ -1,0 +1,112 @@
+name: sentinel attest
+
+# "A clock that belongs to neither party."
+#
+# The sentinel (scripts/sentinel/) writes a hash-chained ledger of every decision it makes and a
+# heartbeat for every session it is present in, one JSONL file per identity under
+# research/sentinel/ledger/. Those files are written by a script inside the agent's own session,
+# so on their own they prove nothing to a third party: the agent's operator holds them.
+#
+# This job seals them. It verifies every chain, writes a manifest of the chain heads, signs the
+# manifest keylessly with Sigstore (the certificate binds it to this workflow's OIDC identity) so
+# that it lands in the public Rekor transparency log, and obtains an RFC 3161 timestamp for the
+# same manifest from an independent timestamp authority. Two clocks, neither ours. Then it commits
+# the attestation back under its own identity, sentinel-attest, whose only declared write is
+# research/sentinel/attestations/.
+#
+# A push made with GITHUB_TOKEN triggers no other workflow, so this job cannot re-trigger itself.
+# Declaration: _config/agents.json (sentinel-attest). Script: scripts/sentinel/attest.mjs.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/sentinel/ledger/**'
+  schedule:
+    - cron: '33 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: sentinel-attest
+  cancel-in-progress: false
+
+jobs:
+  attest:
+    name: Seal the sentinel ledgers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Build the manifest
+        id: manifest
+        run: node scripts/sentinel/attest.mjs manifest "$RUNNER_TEMP/manifest.json"
+
+      - name: Nothing new
+        if: steps.manifest.outputs.changed != 'true' && github.event_name != 'workflow_dispatch'
+        run: echo "Chain heads unchanged since the last attestation — nothing to seal."
+
+      - name: Sign into the transparency log (Sigstore, keyless)
+        if: steps.manifest.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          cosign sign-blob "$RUNNER_TEMP/manifest.json" --bundle "$RUNNER_TEMP/manifest.sigstore.json" --yes
+
+      - name: Timestamp with an independent authority (RFC 3161)
+        if: steps.manifest.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          openssl ts -query -data "$RUNNER_TEMP/manifest.json" -sha256 -cert -out "$RUNNER_TEMP/manifest.tsq"
+          curl -sS --max-time 30 -H 'Content-Type: application/timestamp-query' \
+            --data-binary @"$RUNNER_TEMP/manifest.tsq" http://timestamp.digicert.com > "$RUNNER_TEMP/manifest.tsr"
+          openssl ts -reply -in "$RUNNER_TEMP/manifest.tsr" -text > "$RUNNER_TEMP/manifest.txt"
+          grep -E 'Time stamp|TSA' "$RUNNER_TEMP/manifest.txt" || true
+
+      - name: Record the attestation
+        id: record
+        if: steps.manifest.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -s "$RUNNER_TEMP/manifest.txt" ]; then
+            node scripts/sentinel/attest.mjs finalize "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/manifest.sigstore.json" "$RUNNER_TEMP/manifest.txt" research/sentinel/attestations
+          else
+            node scripts/sentinel/attest.mjs finalize "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/manifest.sigstore.json" research/sentinel/attestations
+          fi
+
+      - name: Commit and push
+        if: steps.manifest.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          SUMMARY: ${{ steps.record.outputs.summary }}
+        run: |
+          git config user.name Vigilia
+          git config user.email sentinel-attest@aivigilia.com
+          git add research/sentinel/attestations
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          printf '%s\n\n%s\n\n%s\n' \
+            "[VIGILIA-SENTINEL] ${SUMMARY:-attested}" \
+            "Run ${GITHUB_RUN_ID} of ${GITHUB_WORKFLOW} on ${GITHUB_EVENT_NAME}. The manifest lists every sentinel ledger's chain head; the Sigstore bundle proves it was logged in Rekor under this workflow's identity; the .tsr is an RFC 3161 timestamp from an independent authority. Verification commands are inside the .json." \
+            "Vigilia-Agent: sentinel-attest" > "$RUNNER_TEMP/msg.txt"
+          git commit -q -F "$RUNNER_TEMP/msg.txt"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase -q origin main && git push -q origin HEAD:main; then
+              echo "Pushed $(git rev-parse --short HEAD)."
+              exit 0
+            fi
+            echo "Push attempt $i failed; retrying."
+            sleep $((i * 5))
+          done
+          echo "Could not push after five attempts." >&2
+          exit 1

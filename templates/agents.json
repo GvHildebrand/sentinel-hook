@@ -1,0 +1,17 @@
+{
+  "_comment": "Minimal agent inventory the sentinel reads at _config/agents.json. Declare each agent, the git committer email unique to it, and the paths it may write. Anything not declared is a person; a committer marked unconfigured gets no scope enforced and every call recorded as unattributed.",
+  "agents": [
+    {
+      "id": "nightly-docs",
+      "name": "Nightly documentation agent",
+      "committer": "nightly-docs@example.invalid",
+      "committer_unique": true,
+      "writes": ["docs/", "CHANGELOG.md", "research/sentinel/ledger/"]
+    }
+  ],
+  "_identities": {
+    "nightly-docs@example.invalid": { "kind": "agent", "agent": "nightly-docs" },
+    "you@example.invalid": { "kind": "human" },
+    "noreply@anthropic.com": { "kind": "unconfigured", "note": "a container that never ran git config" }
+  }
+}

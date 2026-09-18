@@ -1,0 +1,15 @@
+{
+  "name": "sentinel-hook",
+  "version": "0.1.0",
+  "description": "A pre-action gate for Claude Code agents with a hash-chained ledger sealed into Sigstore Rekor and an RFC 3161 timestamp.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test scripts/sentinel/test.mjs",
+    "eval": "node scripts/sentinel/eval-corpus.mjs",
+    "replay": "node scripts/sentinel/replay.mjs",
+    "figures": "node scripts/sentinel/figures.mjs"
+  },
+  "license": "MIT",
+  "engines": { "node": ">=20" }
+}

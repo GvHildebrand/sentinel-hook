@@ -1,0 +1,39 @@
+{
+  "$comment": "Vigilia sentinel — project hooks, committed. Every session in this repository (live, cloud routine, subagent) runs scripts/sentinel/sentinel.mjs: a heartbeat on SessionStart and SubagentStart, and a deterministic allow/ask/deny on every Bash, Write, Edit, MultiEdit, NotebookEdit and Read call before it runs. The record goes to research/sentinel/ledger/. This file is reserved from every agent (scripts/check-agent-scope.mjs).",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/scripts/sentinel/sentinel.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/scripts/sentinel/sentinel.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/scripts/sentinel/sentinel.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

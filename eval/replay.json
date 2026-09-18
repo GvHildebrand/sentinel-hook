@@ -1,0 +1,717 @@
+{
+  "generated": "2026-09-18T16:27:19.259Z",
+  "head": "96a48bb",
+  "commits": 364,
+  "agents": {
+    "agent-ledger": {
+      "commits": 9,
+      "files": 28,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 9,
+        "files": 28,
+        "denied": []
+      },
+      "via": {
+        "identity": 8,
+        "prefix": 1
+      }
+    },
+    "journalism-thread-check": {
+      "commits": 25,
+      "files": 34,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 25,
+        "files": 34,
+        "denied": []
+      },
+      "via": {
+        "identity": 25
+      }
+    },
+    "warnings-daily": {
+      "commits": 34,
+      "files": 276,
+      "before_declaration": {
+        "commits": 7,
+        "files": 188,
+        "denied": [
+          {
+            "sha": "1fae1b9",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/[slug]/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "1fae1b9",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "1fae1b9",
+            "date": "2026-09-05",
+            "file": "src/components/editorial/timeline.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "1fae1b9",
+            "date": "2026-09-05",
+            "file": "src/lib/warnings.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "e87eea2",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/[slug]/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "e87eea2",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "e87eea2",
+            "date": "2026-09-05",
+            "file": "src/app/warnings.json/route.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "e87eea2",
+            "date": "2026-09-05",
+            "file": "src/lib/warnings.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "CLAUDE.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/de/meta.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/de/nav.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/en/meta.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/en/nav.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/es/meta.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/es/nav.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/fr/meta.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/fr/nav.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/it/meta.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "messages/it/nav.json",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/[slug]/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/app/[locale]/warnings/page.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/app/llms.txt/route.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/app/sitemap.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/app/warnings.json/route.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/components/editorial/colophon.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/components/editorial/index.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/components/editorial/masthead.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/components/editorial/timeline.tsx",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/i18n/namespaces.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/lib/i18n/dates.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/lib/warnings.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "eaa5381",
+            "date": "2026-09-05",
+            "file": "src/middleware.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          }
+        ]
+      },
+      "after_declaration": {
+        "commits": 27,
+        "files": 88,
+        "denied": []
+      },
+      "via": {
+        "identity": 26,
+        "prefix": 8
+      }
+    },
+    "source-fetcher": {
+      "commits": 32,
+      "files": 103,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 32,
+        "files": 103,
+        "denied": []
+      },
+      "via": {
+        "identity": 32
+      }
+    },
+    "gtm-taskforce": {
+      "commits": 37,
+      "files": 160,
+      "before_declaration": {
+        "commits": 4,
+        "files": 4,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 33,
+        "files": 156,
+        "denied": [
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/TRANSLATION-BRIEF.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/roadmap/de/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/roadmap/es/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/roadmap/fr/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/roadmap/it/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "content/roadmap/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "55a0ed1",
+            "date": "2026-09-07",
+            "file": "src/lib/pricing/ladder.ts",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": ".github/workflows/citations.yml",
+            "rule": "W01.reserved-path",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/TRANSLATION-BRIEF.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/roadmap/de/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/roadmap/es/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/roadmap/fr/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/roadmap/it/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "content/roadmap/roadmap.md",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          },
+          {
+            "sha": "ba5f838",
+            "date": "2026-09-07",
+            "file": "scripts/check-citations.mjs",
+            "rule": "W02.out-of-scope",
+            "via": "prefix"
+          }
+        ]
+      },
+      "via": {
+        "prefix": 37
+      }
+    }
+  },
+  "people": {
+    "commits": 218,
+    "files": 2141,
+    "reserved_writes": [
+      {
+        "sha": "764524c",
+        "date": "2026-09-13",
+        "file": ".github/workflows/agent-scope.yml"
+      },
+      {
+        "sha": "764524c",
+        "date": "2026-09-13",
+        "file": "_config/routines/README.md"
+      },
+      {
+        "sha": "764524c",
+        "date": "2026-09-13",
+        "file": "scripts/check-agent-scope.mjs"
+      },
+      {
+        "sha": "21dd27c",
+        "date": "2026-09-12",
+        "file": ".github/workflows/fetch-sources.yml"
+      },
+      {
+        "sha": "21dd27c",
+        "date": "2026-09-12",
+        "file": "_config/agents.json"
+      },
+      {
+        "sha": "21dd27c",
+        "date": "2026-09-12",
+        "file": "_config/routines/README.md"
+      },
+      {
+        "sha": "21dd27c",
+        "date": "2026-09-12",
+        "file": "_config/routines/journalism-check.md"
+      },
+      {
+        "sha": "21dd27c",
+        "date": "2026-09-12",
+        "file": "_config/routines/warnings-daily.md"
+      },
+      {
+        "sha": "942e960",
+        "date": "2026-09-11",
+        "file": "_config/agents.json"
+      },
+      {
+        "sha": "942e960",
+        "date": "2026-09-11",
+        "file": "_config/routines/README.md"
+      },
+      {
+        "sha": "942e960",
+        "date": "2026-09-11",
+        "file": "_config/routines/agent-ledger.md"
+      },
+      {
+        "sha": "942e960",
+        "date": "2026-09-11",
+        "file": "_config/routines/journalism-check.md"
+      },
+      {
+        "sha": "942e960",
+        "date": "2026-09-11",
+        "file": "_config/routines/warnings-daily.md"
+      },
+      {
+        "sha": "a82cc92",
+        "date": "2026-09-11",
+        "file": "_config/agents.json"
+      },
+      {
+        "sha": "a82cc92",
+        "date": "2026-09-11",
+        "file": "_config/routines/README.md"
+      },
+      {
+        "sha": "a82cc92",
+        "date": "2026-09-11",
+        "file": "_config/routines/agent-ledger.md"
+      },
+      {
+        "sha": "a82cc92",
+        "date": "2026-09-11",
+        "file": "_config/routines/journalism-check.md"
+      },
+      {
+        "sha": "a82cc92",
+        "date": "2026-09-11",
+        "file": "_config/routines/warnings-daily.md"
+      },
+      {
+        "sha": "a63ccf2",
+        "date": "2026-09-11",
+        "file": "_config/routines/README.md"
+      },
+      {
+        "sha": "a63ccf2",
+        "date": "2026-09-11",
+        "file": "_config/routines/journalism-check.md"
+      },
+      {
+        "sha": "a63ccf2",
+        "date": "2026-09-11",
+        "file": "_config/routines/warnings-daily.md"
+      },
+      {
+        "sha": "0c3ba66",
+        "date": "2026-09-05",
+        "file": ".github/workflows/citations.yml"
+      },
+      {
+        "sha": "0c3ba66",
+        "date": "2026-09-05",
+        "file": ".github/workflows/i18n-parity.yml"
+      },
+      {
+        "sha": "294eaa9",
+        "date": "2026-09-05",
+        "file": ".github/workflows/citations.yml"
+      },
+      {
+        "sha": "d7c1d89",
+        "date": "2026-09-03",
+        "file": ".github/workflows/i18n-parity.yml"
+      },
+      {
+        "sha": "cb914fd",
+        "date": "2026-08-25",
+        "file": ".github/workflows/i18n-parity.yml"
+      }
+    ]
+  },
+  "unconfigured": {
+    "commits": 9,
+    "files": 48,
+    "out_of_declared_union": [
+      {
+        "sha": "34ca3ee",
+        "date": "2026-09-09",
+        "file": "memory/log.md"
+      },
+      {
+        "sha": "d3a6151",
+        "date": "2026-09-09",
+        "file": "memory/log.md"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "messages/de/records.json"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "messages/en/records.json"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "messages/es/records.json"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "messages/fr/records.json"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "messages/it/records.json"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/app/[locale]/records/[slug]/page.tsx"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/app/api/records/[slug]/subscribe/route.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/app/api/webhooks/paddle/route.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/components/records/subscribe-form.tsx"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/lib/funnel/events.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/lib/payments/paddle.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/lib/records.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "src/lib/register/subscriptions.ts"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "worker/Dockerfile"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "worker/README.md"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "worker/tests/test_prospect.py"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "worker/vigilia_worker/__main__.py"
+      },
+      {
+        "sha": "ee7f6a6",
+        "date": "2026-09-09",
+        "file": "worker/vigilia_worker/prospect.py"
+      },
+      {
+        "sha": "5b7a898",
+        "date": "2026-09-09",
+        "file": "beats/product/inbox.md"
+      },
+      {
+        "sha": "5b7a898",
+        "date": "2026-09-09",
+        "file": "memory/log.md"
+      },
+      {
+        "sha": "39797ce",
+        "date": "2026-09-09",
+        "file": "scripts/paddle-prices.mjs"
+      },
+      {
+        "sha": "39797ce",
+        "date": "2026-09-09",
+        "file": "supabase/migrations/034_register.sql"
+      },
+      {
+        "sha": "72b5718",
+        "date": "2026-09-09",
+        "file": "memory/log.md"
+      },
+      {
+        "sha": "e38c9b6",
+        "date": "2026-09-09",
+        "file": ".status.md"
+      },
+      {
+        "sha": "e38c9b6",
+        "date": "2026-09-09",
+        "file": "beats/journalism/inbox.md"
+      },
+      {
+        "sha": "e38c9b6",
+        "date": "2026-09-09",
+        "file": "beats/product/inbox.md"
+      },
+      {
+        "sha": "e38c9b6",
+        "date": "2026-09-09",
+        "file": "memory/log.md"
+      },
+      {
+        "sha": "e38c9b6",
+        "date": "2026-09-09",
+        "file": "memory/reports/2026-09-09-report-to-max.md"
+      }
+    ]
+  }
+}
