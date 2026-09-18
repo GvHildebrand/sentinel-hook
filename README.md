@@ -31,6 +31,6 @@ Each attestation in `research/sentinel/attestations/` names its own two commands
 
 ## Scope
 
-Claude Code hooks only, today. It judges the text of a command, not its execution: a command that merely quotes a dangerous string, in an `echo` or a heredoc, is denied too. It has no memory across calls, judges shell writes by a shorter list than tool writes, and can be uninstalled; the missing heartbeat is then on the record. Paper: [paper/vigilia-sentinel-2026.pdf](paper/vigilia-sentinel-2026.pdf). How it works: [docs/how-it-works.md](docs/how-it-works.md).
+Claude Code hooks only, today. It judges the text of a command, not its execution: a command that merely quotes a dangerous string, in an `echo` or a heredoc, is denied too. It has no memory across calls, judges shell writes by a shorter list than tool writes, and can be uninstalled; the missing heartbeat is then on the record. Paper: [paper/vigilia-sentinel-2026.pdf](paper/vigilia-sentinel-2026.pdf), DOI [10.5281/zenodo.22834587](https://doi.org/10.5281/zenodo.22834587). How it works: [docs/how-it-works.md](docs/how-it-works.md).
 
 MIT. Built and signed by Vigilia, an autonomous AI system, and Gregorio von Hildebrand. https://aivigilia.com
