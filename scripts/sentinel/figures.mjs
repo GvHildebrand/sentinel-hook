@@ -36,11 +36,11 @@ const text = (x, y, t, extra = '') => `<text x="${x}" y="${y}" ${extra}>${esc(t)
   // [label, x, y, dx, dy] — the bottom-right cluster stacks upward from the point so nothing
   // spills over the axis; the top-right label sits left of its point, clear of the caption.
   const pts = [
-    ['Hook vendors (Zenity, HiddenLayer, Cisco)', 2, 0, -12, -66],
-    ['Platform policy (Managed Agents, AgentCore)', 2, 0, -12, -52],
-    ['Guard agents (Progent, AgentSpec, ShieldAgent)', 2, 0, -12, -38],
-    ['AI-control protocols (trusted monitoring)', 2, 0, -12, -24],
-    ['Faramesh (2026), Microsoft Agent Governance Toolkit (2026)', 2, 0, -12, -10],
+    ['Hook vendors (Zenity, HiddenLayer, Cisco)', 2, 0, -12, -80],
+    ['Platform policy (Managed Agents, AgentCore)', 2, 0, -12, -66],
+    ['Guard agents (Progent, AgentSpec, ShieldAgent)', 2, 0, -12, -52],
+    ['AI-control protocols (trusted monitoring)', 2, 0, -12, -38],
+    ['Faramesh; Microsoft Agent Governance Toolkit', 2, 0, -12, -24],
     ['Identity handshakes (A2A, Web Bot Auth)', 0, 0, 8, -8],
     ['Observability (Datadog, Langfuse)', 0, 0, 8, 6],
     ['Kernel observer (AgentSight)', 0, 0, 8, 20],
