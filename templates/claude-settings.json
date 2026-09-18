@@ -1,5 +1,5 @@
 {
-  "$comment": "Vigilia sentinel — project hooks, committed. Every session in this repository (live, cloud routine, subagent) runs scripts/sentinel/sentinel.mjs: a heartbeat on SessionStart and SubagentStart, and a deterministic allow/ask/deny on every Bash, Write, Edit, MultiEdit, NotebookEdit and Read call before it runs. The record goes to research/sentinel/ledger/. This file is reserved from every agent (scripts/check-agent-scope.mjs).",
+  "$comment": "sentinel-hook — project hooks, committed. Every session in this repository (live, scheduled, subagent) runs scripts/sentinel/sentinel.mjs: a heartbeat on SessionStart and SubagentStart, and a deterministic allow/ask/deny on every Bash, Write, Edit, MultiEdit, NotebookEdit and Read call before it runs. The record goes to research/sentinel/ledger/ at the nearest .git (override with VIGILIA_SENTINEL_LEDGER_DIR). Keep this file and scripts/sentinel/ out of every agent's write scope.",
   "hooks": {
     "SessionStart": [
       {

@@ -56,7 +56,9 @@ export function append(file, record) {
 
 /** Verify a ledger file. Returns { ok, lines, head, brokenAt } — brokenAt is the 1-based line. */
 export function verify(file) {
-  const text = existsSync(file) ? readFileSync(file, 'utf8') : ''
+  // A ledger that does not exist is not an intact ledger. (Stranger test 1, confusion 8.)
+  if (!existsSync(file)) return { ok: false, lines: 0, head: null, brokenAt: null, why: 'missing' }
+  const text = readFileSync(file, 'utf8')
   const lines = text.split('\n').filter((l) => l.trim())
   let prev = null
   for (let i = 0; i < lines.length; i++) {

@@ -1,6 +1,6 @@
 # Sentinel — corpus evaluation
 
-Generated 2026-09-18T16:27:14.477Z by `scripts/sentinel/eval-corpus.mjs` from `scripts/sentinel/corpus.json`. A deny or an ask counts as caught.
+Generated 2026-09-18T17:03:59.798Z by `scripts/sentinel/eval-corpus.mjs` from `scripts/sentinel/corpus.json`. A deny or an ask counts as caught.
 
 ## Profile: agent
 

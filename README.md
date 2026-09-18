@@ -5,26 +5,32 @@ A pre-action gate for Claude Code agents: it allows, asks or denies every shell 
 ## Quickstart
 
 ```bash
-git clone https://github.com/GvHildebrand/sentinel-hook && cd sentinel-hook
-node --test scripts/sentinel/test.mjs          # 17 tests
-mkdir -p yourproject/.claude yourproject/scripts
-cp -r scripts/sentinel yourproject/scripts/ && cp templates/claude-settings.json yourproject/.claude/settings.json
+git clone https://github.com/GvHildebrand/sentinel-hook && cd sentinel-hook && node --test scripts/sentinel/test.mjs
+cd .. && mkdir -p yourproject/.claude yourproject/scripts && cd yourproject && git init -q
+cp -r ../sentinel-hook/scripts/sentinel scripts/ && cp ../sentinel-hook/templates/claude-settings.json .claude/settings.json
 ```
 
-Open `yourproject` in Claude Code. Every session now writes `research/sentinel/ledger/<identity>.jsonl`; a denied call says which rule and which record.
+Open `yourproject` in Claude Code. Every session now writes `research/sentinel/ledger/<identity>.jsonl` at the nearest `.git` (identity: a declared agent id, or `person-<your git email>`); a denied call names its rule and its record; an allowed call prints nothing, the ledger line is the proof.
+
+Try it without Claude Code, from inside `yourproject`:
+
+```bash
+echo '{"hook_event_name":"PreToolUse","session_id":"s","cwd":"'$PWD'","tool_name":"Bash","tool_input":{"command":"rm -rf ~"}}' | node scripts/sentinel/sentinel.mjs
+```
+
 To declare agents and their allowed paths, copy `templates/agents.json` to `_config/agents.json`. To seal the ledger, copy `templates/sentinel-attest.yml` to `.github/workflows/` (needs `id-token: write`).
 
 ## Verify a sealed record
 
-Each attestation in `research/sentinel/attestations/` names its own two commands: `cosign verify-blob` against the Sigstore bundle, `openssl ts -verify` against the timestamp reply. See [docs/verify.md](docs/verify.md).
+Each attestation in `research/sentinel/attestations/` names its own two commands: `cosign verify-blob` against the Sigstore bundle, `openssl ts -verify` against the timestamp reply. Tools, chains and what each step proves: [docs/verify.md](docs/verify.md).
 
 ## Tested by
 
-- A cold AI session given only this link: [docs/stranger-tests.md](docs/stranger-tests.md), every confusion recorded.
+- A cold AI session given only this link, 2026-09-18: nine minutes to a working denial, thirteen confusions, eleven fixed the same day — [docs/stranger-tests.md](docs/stranger-tests.md).
 - A human outsider: not yet. Results will be published in the same file when they exist.
 
 ## Scope
 
-Claude Code hooks only, today. It has no memory across calls, judges shell writes by a shorter list than tool writes, and can be uninstalled; the missing heartbeat is then on the record. Paper: [paper/vigilia-sentinel-2026.pdf](paper/vigilia-sentinel-2026.pdf). How it works: [docs/how-it-works.md](docs/how-it-works.md).
+Claude Code hooks only, today. It judges the text of a command, not its execution: a command that merely quotes a dangerous string, in an `echo` or a heredoc, is denied too. It has no memory across calls, judges shell writes by a shorter list than tool writes, and can be uninstalled; the missing heartbeat is then on the record. Paper: [paper/vigilia-sentinel-2026.pdf](paper/vigilia-sentinel-2026.pdf). How it works: [docs/how-it-works.md](docs/how-it-works.md).
 
 MIT. Built and signed by Vigilia, an autonomous AI system, and Gregorio von Hildebrand. https://aivigilia.com

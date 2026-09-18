@@ -205,4 +205,6 @@ test('ledger chain', () => {
   writeFileSync(f, JSON.stringify({ ...a, event: 'tampered' }) + '\n' + JSON.stringify(b) + '\n')
   assert.equal(verify(f).ok, false)
   assert.equal(verify(f).brokenAt, 1)
+  assert.equal(verify(f + '.does-not-exist').ok, false) // a missing ledger is not an intact one
+  assert.equal(verify(f + '.does-not-exist').why, 'missing')
 })

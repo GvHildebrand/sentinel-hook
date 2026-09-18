@@ -64,7 +64,14 @@ a space or a slash is appended to the text under examination. Nothing is execute
 
 ## The ledger
 
-One JSONL file per identity under `research/sentinel/ledger/`. Each line: timestamp, event,
+One JSONL file per identity under `research/sentinel/ledger/`, **at the nearest `.git` above the
+session's working directory** — so a project nested inside another repository writes into the outer
+one. `VIGILIA_SENTINEL_LEDGER_DIR` overrides the location; with no `.git` anywhere above, the
+fallback is `~/.vigilia-sentinel/`. The file is named after the identity: `<agent-id>.jsonl` for a
+declared agent, `person-<git-email-slug>.jsonl` for a person, `unconfigured-….jsonl` for a
+container that never set its identity.
+
+Each line: timestamp, event,
 identity and how it was resolved, subagent id if any, tool, a redacted excerpt of the target and a
 sha256 of the full command, decision, rule, severity, reason, findings, sentinel version, sha256 of
 the rules file, `prev` (previous line's hash) and `hash` (sha256 of the canonical line). `verify()`

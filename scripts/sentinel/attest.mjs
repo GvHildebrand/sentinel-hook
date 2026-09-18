@@ -101,8 +101,11 @@ function finalize(manifestPath, bundlePath, tsaTextPath, outDir) {
     bundle: `${base}.sigstore.json`,
     tsr: tsa ? `${base}.tsr` : null,
     verify: {
-      cosign: `cosign verify-blob manifest.json --bundle ${base}.sigstore.json --certificate-identity-regexp '^https://github.com/GvHildebrand/vigilia/' --certificate-oidc-issuer https://token.actions.githubusercontent.com`,
-      openssl: tsa ? `openssl ts -verify -data manifest.json -in ${base}.tsr -CAfile <tsa-chain.pem>` : null,
+      // The identity is the repository whose workflow sealed this; a reader of a copy elsewhere
+      // still verifies against the sealing repository, never the copy's.
+      cosign: `cosign verify-blob ${base}.manifest.json --bundle ${base}.sigstore.json --certificate-identity-regexp '^https://github.com/${m.repo}/' --certificate-oidc-issuer https://token.actions.githubusercontent.com`,
+      openssl: tsa ? `openssl ts -verify -data ${base}.manifest.json -in ${base}.tsr -CAfile digicert-tsa-chain.pem   # chain: docs/verify.md` : null,
+      sealed_by: `https://github.com/${m.repo}`,
     },
   }
   writeFileSync(path.join(outDir, `${base}.json`), JSON.stringify(rec, null, 2) + '\n')

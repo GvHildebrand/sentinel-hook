@@ -24,7 +24,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const SENTINEL_VERSION = '0.1.0'
+export const SENTINEL_VERSION = '0.1.1'
 
 /** Paths no agent may write, whatever the inventory says. Mirrors scripts/check-agent-scope.mjs. */
 export const RESERVED_PATHS = [
