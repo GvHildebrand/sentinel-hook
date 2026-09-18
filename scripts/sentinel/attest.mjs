@@ -33,13 +33,64 @@ function head() {
 
 function newestAttestation() {
   if (!existsSync(ATTEST_DIR)) return null
-  const files = readdirSync(ATTEST_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}T.*\.json$/.test(f) && !f.endsWith('.sigstore.json')).sort()
+  const files = readdirSync(ATTEST_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}T.*\.json$/.test(f) && !f.endsWith('.sigstore.json') && !f.endsWith('.manifest.json')).sort()
   if (!files.length) return null
   try {
     return JSON.parse(readFileSync(path.join(ATTEST_DIR, files[files.length - 1]), 'utf8'))
   } catch {
     return null
   }
+}
+
+/**
+ * Which agent sessions happened, and did each leave a heartbeat? A commit by a declared agent that
+ * runs Claude Code is a session the world can see; its ledger must hold a heartbeat in the hours
+ * before that commit. A commit without one is a session the sentinel was not present in — the
+ * absence the record exists to make visible, checked mechanically rather than hoped for.
+ */
+function sessions(sinceCommit) {
+  let inv
+  try {
+    inv = JSON.parse(readFileSync(path.join(ROOT, '_config', 'agents.json'), 'utf8'))
+  } catch {
+    return { checked: 0, without_heartbeat: 0, list: [], note: 'no inventory' }
+  }
+  const agentByEmail = new Map()
+  for (const [email, who] of Object.entries(inv._identities ?? {})) if (!email.startsWith('_') && who?.kind === 'agent' && who.agent) agentByEmail.set(email.toLowerCase(), who.agent)
+  for (const a of inv.agents ?? []) if (a.committer_unique === true) for (const e of [a.committer].flat().filter(Boolean)) agentByEmail.set(String(e).toLowerCase(), a.id)
+  const hooked = new Set((inv.agents ?? []).filter((a) => a.runner === 'cloud-routine' && a.status === 'live').map((a) => a.id))
+  let log = ''
+  try {
+    const range = sinceCommit ? `${sinceCommit}..HEAD` : '-n 50'
+    log = execFileSync('git', ['-C', ROOT, 'log', '--no-merges', '--format=%H%x1f%ce%x1f%cI', ...(sinceCommit ? [range] : ['-n', '50'])], { encoding: 'utf8' })
+  } catch {
+    return { checked: 0, without_heartbeat: 0, list: [], note: 'git log failed' }
+  }
+  const list = []
+  for (const line of log.trim().split('\n').filter(Boolean)) {
+    const [sha, email, iso] = line.split('\x1f')
+    const agent = agentByEmail.get((email || '').toLowerCase())
+    if (!agent || !hooked.has(agent)) continue
+    const t = Date.parse(iso)
+    const file = path.join(LEDGER_DIR, `${agent}.jsonl`)
+    let heartbeat = null
+    if (existsSync(file)) {
+      for (const l of readFileSync(file, 'utf8').split('\n')) {
+        if (!l.trim()) continue
+        let r
+        try {
+          r = JSON.parse(l)
+        } catch {
+          continue
+        }
+        if (r.kind !== 'heartbeat') continue
+        const ts = Date.parse(r.ts)
+        if (ts <= t + 5 * 60_000 && ts >= t - 12 * 3600_000) heartbeat = r.hash
+      }
+    }
+    list.push({ agent, commit: sha.slice(0, 7), committed: iso, heartbeat: heartbeat ? 'found' : 'missing', record: heartbeat ? heartbeat.slice(0, 12) : null })
+  }
+  return { checked: list.length, without_heartbeat: list.filter((x) => x.heartbeat === 'missing').length, list, since: sinceCommit || null }
 }
 
 function manifest(out) {
@@ -49,7 +100,8 @@ function manifest(out) {
     const v = verify(p)
     return { path: `research/sentinel/ledger/${f}`, sha256: sha256(readFileSync(p)), lines: v.lines, head: v.head, chain_ok: v.ok, broken_at: v.brokenAt }
   })
-  const m = { v: 1, kind: 'vigilia-sentinel-ledger-manifest', ts: new Date().toISOString(), repo: process.env.GITHUB_REPOSITORY || 'GvHildebrand/vigilia', commit: head(), files: entries }
+  const prevAtt = newestAttestation()
+  const m = { v: 1, kind: 'vigilia-sentinel-ledger-manifest', ts: new Date().toISOString(), repo: process.env.GITHUB_REPOSITORY || 'GvHildebrand/vigilia', commit: head(), files: entries, sessions: sessions(prevAtt?.manifest?.commit) }
   writeFileSync(out, JSON.stringify(m, null, 2) + '\n')
   const prev = newestAttestation()
   const prevHeads = JSON.stringify((prev?.manifest?.files ?? []).map((f) => [f.path, f.head]))
@@ -110,7 +162,8 @@ function finalize(manifestPath, bundlePath, tsaTextPath, outDir) {
   }
   writeFileSync(path.join(outDir, `${base}.json`), JSON.stringify(rec, null, 2) + '\n')
   copyFileSync(manifestPath, path.join(outDir, `${base}.manifest.json`))
-  const summary = `attested ${m.files.length} ledger(s) at ${m.commit?.slice(0, 7) ?? '?'}: rekor index ${rekor.logIndex ?? '?'}${tsa?.generated ? `, TSA ${tsa.generated}` : ''}`
+  const sess = m.sessions ? `; sessions ${m.sessions.checked} checked, ${m.sessions.without_heartbeat} without heartbeat` : ''
+  const summary = `attested ${m.files.length} ledger(s) at ${m.commit?.slice(0, 7) ?? '?'}: rekor index ${rekor.logIndex ?? '?'}${tsa?.generated ? `, TSA ${tsa.generated}` : ''}${sess}`
   if (process.env.GITHUB_OUTPUT) writeFileSync(process.env.GITHUB_OUTPUT, `summary=${summary}\nfile=${base}.json\n`, { flag: 'a' })
   process.stdout.write(summary + '\n')
 }

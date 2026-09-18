@@ -1,0 +1,17 @@
+{
+  "v": 1,
+  "kind": "vigilia-sentinel-ledger-manifest",
+  "ts": "2026-09-18T16:58:01.215Z",
+  "repo": "GvHildebrand/vigilia",
+  "commit": "660b452d3b73564d1b7a9ba6dc1ea798f511e263",
+  "files": [
+    {
+      "path": "research/sentinel/ledger/person-vigilia-vigilia-dev.jsonl",
+      "sha256": "fbd57b35804009d452fd123c9ac06f781fd4ea3b7e463e1f0bd522cddba65d51",
+      "lines": 64,
+      "head": "0c43db10c5cf64080c6973ab12eaf670c1b40bac05b11568b517aa4e55ce4d73",
+      "chain_ok": true,
+      "broken_at": null
+    }
+  ]
+}

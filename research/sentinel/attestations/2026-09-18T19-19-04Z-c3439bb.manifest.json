@@ -1,0 +1,33 @@
+{
+  "v": 1,
+  "kind": "vigilia-sentinel-ledger-manifest",
+  "ts": "2026-09-18T19:19:04.692Z",
+  "repo": "GvHildebrand/vigilia",
+  "commit": "c3439bb7153a4e05ea724b1be95b7ca198281eb2",
+  "files": [
+    {
+      "path": "research/sentinel/ledger/journalism-thread-check.jsonl",
+      "sha256": "39351e889502b2d9696b58a27cccfe8c1280f97226a5b25e68c4abb57a2de826",
+      "lines": 16,
+      "head": "91abe9db501c81616bf044ec6d199d943e0526586523960ba30567dbe6cf95f9",
+      "chain_ok": true,
+      "broken_at": null
+    },
+    {
+      "path": "research/sentinel/ledger/person-vigilia-vigilia-dev.jsonl",
+      "sha256": "894ea4b07c6bf33e914f172b68a2796884b009265dbc68739dc7ab6d93c067df",
+      "lines": 99,
+      "head": "3e9bcb49f8c264050ae94b1b459a1a36059dc36af51344291e0642b218e95de2",
+      "chain_ok": true,
+      "broken_at": null
+    },
+    {
+      "path": "research/sentinel/ledger/unconfigured-noreply-anthropic-com.jsonl",
+      "sha256": "29bbd71f5f630143fd2ca6afc8e1b6ad70459f58ecda098107c29d8e1c93da7c",
+      "lines": 6,
+      "head": "afa8fd5c3d5c55f62fcbbf93b98ed5e4446b6d0644d2a474a0a3841c71d75817",
+      "chain_ok": true,
+      "broken_at": null
+    }
+  ]
+}

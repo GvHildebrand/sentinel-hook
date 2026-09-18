@@ -33,19 +33,24 @@ const text = (x, y, t, extra = '') => `<text x="${x}" y="${y}" ${extra}>${esc(t)
 // Figure 1 — the landscape: blocks before the action × reports beyond the operator
 // ---------------------------------------------------------------------------------------------
 {
+  // [label, x, y, dx, dy] — the bottom-right cluster stacks upward from the point so nothing
+  // spills over the axis; the top-right label sits left of its point, clear of the caption.
   const pts = [
-    ['Hook vendors (Zenity, HiddenLayer, Cisco)', 2, 0, -6, 14],
-    ['Platform policy (Managed Agents, AgentCore)', 2, 0, -6, 28],
-    ['Guard agents (Progent, AgentSpec, ShieldAgent)', 2, 0, -6, 42],
-    ['AI-control protocols (trusted monitoring)', 2, 0, -6, 56],
+    ['Hook vendors (Zenity, HiddenLayer, Cisco)', 2, 0, -12, -66],
+    ['Platform policy (Managed Agents, AgentCore)', 2, 0, -12, -52],
+    ['Guard agents (Progent, AgentSpec, ShieldAgent)', 2, 0, -12, -38],
+    ['AI-control protocols (trusted monitoring)', 2, 0, -12, -24],
+    ['Faramesh (2026), Microsoft Agent Governance Toolkit (2026)', 2, 0, -12, -10],
     ['Identity handshakes (A2A, Web Bot Auth)', 0, 0, 8, -8],
     ['Observability (Datadog, Langfuse)', 0, 0, 8, 6],
     ['Kernel observer (AgentSight)', 0, 0, 8, 20],
     ['Gossip / reputation research', 0, 1, 8, 4],
+    ['Fleet measurement (Anthropic, 2026-09-17)', 0, 1, 8, 18],
+    ['Blockchain-anchored log (Brömme 2026, proposed, unevaluated)', 0, 1, 8, 32],
+    ['agent-provenance (signed log, timestamping removed)', 0, 1, 8, 46],
     ['Public thread (AI Village)', 0, 2, 8, 4],
     ["Vigilia's post-push tripwire (2026-09-13)", 0, 2, 8, 18],
-    ['Fleet measurement (Anthropic, 2026-09-17)', 0, 1, 8, 18],
-    ['Sentinel (this paper)', 2, 2, -6, -10],
+    ['Sentinel (this paper)', 2, 2, -12, 4],
   ]
   const W = 720
   const H = 440
@@ -57,7 +62,7 @@ const text = (x, y, t, extra = '') => `<text x="${x}" y="${y}" ${extra}>${esc(t)
   const Y = (v) => y0 + ph - (v / 2) * ph
   let b = ''
   b += `<rect x="${X(1)}" y="${y0}" width="${pw / 2}" height="${ph / 2}" fill="${G1}"/>`
-  b += mono(X(1) + 8, y0 + 14, 'The empty quadrant, until now', `fill="${G4}"`)
+  b += mono(X(1) + 8, y0 + ph / 2 - 8, 'Empty among deployed, evaluated systems we found', `fill="${G4}"`)
   b += `<rect x="${x0}" y="${y0}" width="${pw}" height="${ph}" fill="none" stroke="${INK}" stroke-width="1"/>`
   b += `<line x1="${X(1)}" y1="${y0}" x2="${X(1)}" y2="${y0 + ph}" stroke="${G2}"/><line x1="${x0}" y1="${Y(1)}" x2="${x0 + pw}" y2="${Y(1)}" stroke="${G2}"/>`
   b += mono(x0 + pw / 2, y0 + ph + 34, 'Blocks the action before it runs →', 'text-anchor="middle"')
@@ -221,6 +226,43 @@ const text = (x, y, t, extra = '') => `<text x="${x}" y="${y}" ${extra}>${esc(t)
     b += mono(30, y, `${r.caught}/${r.total}  ${cls}${miss ? '  — missed: ' + r.missed.join(' ; ') : ''}`, miss ? `fill="${RED}"` : '')
   })
   writeFileSync(path.join(OUT, 'corpus.svg'), svg(W, H, b))
+}
+
+// ---------------------------------------------------------------------------------------------
+// Figure 6 — the first day of live use, from the session ledger as it stood under the 0.1 rules
+// ---------------------------------------------------------------------------------------------
+{
+  const f = path.join(ROOT, 'research', 'sentinel', 'eval', 'live-day-one.json')
+  let live = null
+  try {
+    live = JSON.parse(readFileSync(f, 'utf8'))
+  } catch {
+    live = null
+  }
+  if (live) {
+    const W = 720
+    const rows = Object.entries(live.non_allow_by_rule || {})
+    const H = 120 + rows.length * 18 + 30
+    let b = mono(12, 16, `First day of live use — ${live.decisions} decisions in one session, ${live.first?.slice(0, 16)} to ${live.last?.slice(0, 16)} UTC`)
+    const total = live.decisions || 1
+    const seg = (x, w, fill) => `<rect x="${x}" y="30" width="${w}" height="16" fill="${fill}"/>`
+    const pw = 696
+    let x = 12
+    for (const [k, fill] of [['allow', G2], ['ask', G3], ['deny', RED]]) {
+      const n = live.by_decision?.[k] || 0
+      const w = (n / total) * pw
+      b += seg(x, w, fill) + (n ? mono(x + 4, 42, `${k} ${n}`, k === 'allow' ? '' : 'fill="#fff"') : '')
+      x += w
+    }
+    b += mono(12, 66, `Every one of the ${live.non_allow} non-allow decisions was judged a false positive on review:`, `fill="${G4}"`)
+    rows.forEach(([rule, n], i) => {
+      const y = 86 + i * 18
+      b += `<rect x="12" y="${y - 10}" width="${Math.max(4, (n / live.non_allow) * 300)}" height="12" fill="${RED}"/>`
+      b += mono(330, y, `${n}  ${rule}  — ${live.explanations?.[rule] || ''}`)
+    })
+    b += mono(12, H - 12, 'All three classes are corrected in sentinel 0.2.0; the corpus carries them as regression items N41–N54.', `fill="${G4}"`)
+    writeFileSync(path.join(OUT, 'live-day-one.svg'), svg(W, H, b))
+  }
 }
 
 console.log('figures written to', path.relative(ROOT, OUT))

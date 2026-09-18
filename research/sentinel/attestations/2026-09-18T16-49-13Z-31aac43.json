@@ -1,0 +1,42 @@
+{
+  "v": 1,
+  "kind": "vigilia-sentinel-attestation",
+  "manifest": {
+    "v": 1,
+    "kind": "vigilia-sentinel-ledger-manifest",
+    "ts": "2026-09-18T16:49:13.715Z",
+    "repo": "GvHildebrand/vigilia",
+    "commit": "31aac4362c2037f4ed733a25524a1dca286650fd",
+    "files": [
+      {
+        "path": "research/sentinel/ledger/person-vigilia-vigilia-dev.jsonl",
+        "sha256": "73b84285409cfdbcfba0972055a147da43d21ab224208e831c1cf5d94b25164c",
+        "lines": 51,
+        "head": "26b9a39168812412ec1f22f7a1de048c99f2b2f07446e9f3e1a26438ecf8b30f",
+        "chain_ok": true,
+        "broken_at": null
+      }
+    ]
+  },
+  "manifest_sha256": "121f7a09ac7cae5c66e96e975d90b3c2960780fc79008790308ef9eb0ace2086",
+  "rekor": {
+    "logIndex": 2886618710,
+    "integratedTime": 1789750154,
+    "logId": "c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d",
+    "format": "cosign-bundle",
+    "integratedTimeISO": "2026-09-18T16:49:14.000Z",
+    "search": "https://search.sigstore.dev/?logIndex=2886618710"
+  },
+  "tsa": {
+    "generated": "Sep 18 16:49:14 2026 GMT",
+    "serial": "0x5062C414D30E1105B8F272AE853C797E",
+    "tsa": "unspecified",
+    "policy": "2.16.840.1.114412.7.1"
+  },
+  "bundle": "2026-09-18T16-49-13Z-31aac43.sigstore.json",
+  "tsr": "2026-09-18T16-49-13Z-31aac43.tsr",
+  "verify": {
+    "cosign": "cosign verify-blob manifest.json --bundle 2026-09-18T16-49-13Z-31aac43.sigstore.json --certificate-identity-regexp '^https://github.com/GvHildebrand/vigilia/' --certificate-oidc-issuer https://token.actions.githubusercontent.com",
+    "openssl": "openssl ts -verify -data manifest.json -in 2026-09-18T16-49-13Z-31aac43.tsr -CAfile <tsa-chain.pem>"
+  }
+}

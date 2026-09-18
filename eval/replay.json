@@ -1,8 +1,59 @@
 {
-  "generated": "2026-09-18T16:27:19.259Z",
-  "head": "96a48bb",
-  "commits": 364,
+  "generated": "2026-09-18T23:48:38.193Z",
+  "head": "7dd6f6c",
+  "commits": 392,
   "agents": {
+    "sentinel-attest": {
+      "commits": 11,
+      "files": 44,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 11,
+        "files": 44,
+        "denied": []
+      },
+      "via": {
+        "identity": 11
+      }
+    },
+    "source-fetcher": {
+      "commits": 34,
+      "files": 105,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 34,
+        "files": 105,
+        "denied": []
+      },
+      "via": {
+        "identity": 34
+      }
+    },
+    "journalism-thread-check": {
+      "commits": 28,
+      "files": 40,
+      "before_declaration": {
+        "commits": 0,
+        "files": 0,
+        "denied": []
+      },
+      "after_declaration": {
+        "commits": 28,
+        "files": 40,
+        "denied": []
+      },
+      "via": {
+        "identity": 28
+      }
+    },
     "agent-ledger": {
       "commits": 9,
       "files": 28,
@@ -19,23 +70,6 @@
       "via": {
         "identity": 8,
         "prefix": 1
-      }
-    },
-    "journalism-thread-check": {
-      "commits": 25,
-      "files": 34,
-      "before_declaration": {
-        "commits": 0,
-        "files": 0,
-        "denied": []
-      },
-      "after_declaration": {
-        "commits": 25,
-        "files": 34,
-        "denied": []
-      },
-      "via": {
-        "identity": 25
       }
     },
     "warnings-daily": {
@@ -281,23 +315,6 @@
         "prefix": 8
       }
     },
-    "source-fetcher": {
-      "commits": 32,
-      "files": 103,
-      "before_declaration": {
-        "commits": 0,
-        "files": 0,
-        "denied": []
-      },
-      "after_declaration": {
-        "commits": 32,
-        "files": 103,
-        "denied": []
-      },
-      "via": {
-        "identity": 32
-      }
-    },
     "gtm-taskforce": {
       "commits": 37,
       "files": 160,
@@ -423,9 +440,169 @@
     }
   },
   "people": {
-    "commits": 218,
-    "files": 2141,
+    "commits": 230,
+    "files": 2260,
     "reserved_writes": [
+      {
+        "sha": "7dd6f6c",
+        "date": "2026-09-18",
+        "file": ".github/workflows/sentinel-attest.yml"
+      },
+      {
+        "sha": "7dd6f6c",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/attest.mjs"
+      },
+      {
+        "sha": "7dd6f6c",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/corpus-heldout.json"
+      },
+      {
+        "sha": "7dd6f6c",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/eval-corpus.mjs"
+      },
+      {
+        "sha": "7dd6f6c",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/sentinel.mjs"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/attest.mjs"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/corpus.json"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/eval-corpus.mjs"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/figures.mjs"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/rules.mjs"
+      },
+      {
+        "sha": "8740818",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/test.mjs"
+      },
+      {
+        "sha": "c0f6fd4",
+        "date": "2026-09-18",
+        "file": ".claude/settings.json"
+      },
+      {
+        "sha": "c0f6fd4",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/attest.mjs"
+      },
+      {
+        "sha": "c0f6fd4",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/ledger.mjs"
+      },
+      {
+        "sha": "c0f6fd4",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/rules.mjs"
+      },
+      {
+        "sha": "c0f6fd4",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/test.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": ".claude/settings.json"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": ".github/workflows/sentinel-attest.yml"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "_config/agents.json"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "_config/routines/agent-ledger.md"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "_config/routines/journalism-check.md"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "_config/routines/warnings-daily.md"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/check-agent-scope.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/attest.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/corpus.json"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/eval-corpus.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/figures.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/ledger.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/replay.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/rules.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/sentinel.mjs"
+      },
+      {
+        "sha": "1b676f1",
+        "date": "2026-09-18",
+        "file": "scripts/sentinel/test.mjs"
+      },
       {
         "sha": "764524c",
         "date": "2026-09-13",

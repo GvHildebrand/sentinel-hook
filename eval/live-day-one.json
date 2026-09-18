@@ -1,0 +1,39 @@
+{
+  "generated": "2026-09-18T22:54:57.337Z",
+  "rules_versions": [
+    "0.1.0",
+    "0.1.1"
+  ],
+  "identity": "person (a live session on the authors' machine)",
+  "lines": 295,
+  "decisions": 285,
+  "heartbeats": 10,
+  "errors": 0,
+  "by_decision": {
+    "allow": 272,
+    "ask": 11,
+    "deny": 2
+  },
+  "by_tool": {
+    "Write": 31,
+    "Edit": 15,
+    "Bash": 195,
+    "Read": 44
+  },
+  "non_allow": 13,
+  "non_allow_by_rule": {
+    "B16.persistence-mutation": 6,
+    "B01.rm-recursive-catastrophic": 2,
+    "B14.credential-read": 1,
+    "B10.remote-code-execution": 4
+  },
+  "first": "2026-09-18T16:23:01.124Z",
+  "last": "2026-09-18T22:19:57.397Z",
+  "review": "Every non-allow decision was read by the authors and judged a false positive; the three classes and their corrections are in sentinel 0.2.0 and in corpus items N41 to N54.",
+  "explanations": {
+    "B16.persistence-mutation": "the project's own .claude/settings.json matched a persistence pattern meant for the home directory",
+    "B10.remote-code-execution": "curl piped into node -e, a data pipeline, read as download-and-execute",
+    "B01.rm-recursive-catastrophic": "a command that only quoted the dangerous string (a hook-input JSON; a heredoc writing a report)",
+    "B14.credential-read": "a command that mentioned a credential path without reading it"
+  }
+}

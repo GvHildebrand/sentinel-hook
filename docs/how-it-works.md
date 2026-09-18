@@ -59,8 +59,25 @@ for a **person**, the catastrophic classes deny and the rest ask.
 
 Before matching, a shell command is normalised: line continuations, `\xHH` escapes and backslash
 prefixes are resolved, quotes are removed (so `sh -c "…"` is read as the command it carries),
-`$(printf …)` is expanded, and any token that decodes from base64 to a printable string containing
-a space or a slash is appended to the text under examination. Nothing is executed.
+`$(printf …)` is expanded, and, when the command contains a decoder (`base64 -d`, `xxd -r`), any
+token that decodes to a printable string containing a space or a slash is appended to the text
+under examination. Nothing is executed.
+
+**Text a command carries is data (0.2.0).** Before normalisation, on the raw text where quotes and
+line breaks still mean something, the body of a heredoc and the argument of a leading `echo` or
+`printf` are replaced by `DATA` unless that text reaches something that executes it: the heredoc
+feeds a shell or interpreter, the segment pipes into a bare shell or interpreter, `eval`, `source`,
+`xargs` or a decoder, or the file it writes is run later in the same command. `echo 'rm -rf ~'`
+prints a string; `echo 'rm -rf ~' | sh` runs it; `echo 'rm -rf ~' > c.sh; sh c.sh` runs it too.
+The first day of live use produced two denials on commands that only quoted the string, and the
+first stranger test met the same class twice; that is why.
+
+Three other 0.2.0 corrections from the first day of live use: B16 matches persistence paths only
+when anchored to the home directory or the system (the project's own `.claude/settings.json` is a
+reserved path, B15/W01, not a persistence location); B10 fires only when the download's sink
+executes what it reads (a bare shell, or an interpreter with no inline program and no script file:
+`curl … | node -e "…"` is a data pipeline); B15's mutating verb must be a statement's command word
+and, for `cp`/`mv`, the reserved path must be the destination.
 
 ## The ledger
 
@@ -85,6 +102,18 @@ signature and the workflow's OIDC identity are entered in the Sigstore Rekor tra
 requests an RFC 3161 timestamp for the same manifest from DigiCert's public authority, and commits
 the attestation, bundle and timestamp reply under its own identity. Verification is in
 `docs/verify.md`.
+
+**Sessions without a heartbeat (0.2.0).** The manifest also lists every commit in the sealed range
+made by a declared agent that runs Claude Code (`runner: cloud-routine`) and whether that agent's
+ledger holds a heartbeat in the twelve hours before the commit. A `missing` is named in the sealing
+commit. Because a routine sets its git identity a few calls into its run, its SessionStart
+heartbeat lands under the unconfigured identity; since 0.2.0 the hook writes a second heartbeat
+the moment an identity first resolves in a session, so the cross-check finds one under the agent's
+own name. The check needs history: the workflow checks out 200 commits, not one.
+
+**What the seal does not prove.** That the rules were right, that the ledger was not edited in the
+window between a hook write and the next push, or that no unhooked session ran alongside. The
+paper's §5.6 lists what the operator can still do and what trace each move leaves.
 
 ## Failure mode
 

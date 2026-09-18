@@ -1,15 +1,16 @@
 # Sentinel — replay over git history
 
-Generated 2026-09-18T16:27:19.259Z at `96a48bb` by `scripts/sentinel/replay.mjs`: 364 non-merge commits, every file of every agent-attributed commit evaluated against today's inventory (W01 reserved paths, W02 declared scope).
+Generated 2026-09-18T23:48:38.193Z at `7dd6f6c` by `scripts/sentinel/replay.mjs`: 392 non-merge commits, every file of every agent-attributed commit evaluated against today's inventory (W01 reserved paths, W02 declared scope).
 
 | Agent | Commits | Files | Attributed by | Before declaration: commits / files / would-deny | After declaration: commits / files / would-deny |
 |---|---|---|---|---|---|
+| `sentinel-attest` | 11 | 44 | identity 11 | 0 / 0 / **0** | 11 / 44 / **0** |
+| `source-fetcher` | 34 | 105 | identity 34 | 0 / 0 / **0** | 34 / 105 / **0** |
+| `journalism-thread-check` | 28 | 40 | identity 28 | 0 / 0 / **0** | 28 / 40 / **0** |
 | `agent-ledger` | 9 | 28 | identity 8, prefix 1 | 0 / 0 / **0** | 9 / 28 / **0** |
-| `journalism-thread-check` | 25 | 34 | identity 25 | 0 / 0 / **0** | 25 / 34 / **0** |
 | `warnings-daily` | 34 | 276 | identity 26, prefix 8 | 7 / 188 / **32** | 27 / 88 / **0** |
-| `source-fetcher` | 32 | 103 | identity 32 | 0 / 0 / **0** | 32 / 103 / **0** |
 | `gtm-taskforce` | 37 | 160 | prefix 37 | 4 / 4 / **0** | 33 / 156 / **15** |
-| people and live sessions | 218 | 2141 | — | reserved-path writes: 26 | (allowed; recorded) |
+| people and live sessions | 230 | 2260 | — | reserved-path writes: 58 | (allowed; recorded) |
 | unconfigured containers | 9 | 48 | — | files outside every declared scope: 30 | (unattributable) |
 
 ### `warnings-daily` — would have been denied, before declaration (32)

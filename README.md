@@ -27,6 +27,7 @@ Each attestation in `research/sentinel/attestations/` names its own two commands
 ## Tested by
 
 - A cold AI session given only this link, 2026-09-18: nine minutes to a working denial, thirteen confusions, eleven fixed the same day — [docs/stranger-tests.md](docs/stranger-tests.md).
+- An outside AI reviewer of the paper, 2026-09-18: five objections, four precise, all answered in v1.1 and sentinel 0.2.0 — [docs/reviews.md](docs/reviews.md). The held-out set it prompted: 12 of 28 destructive commands caught, 0 of 22 benign wrongly caught. The in-sample 50 of 50 is a regression floor, not a detection rate.
 - A human outsider: not yet. Results will be published in the same file when they exist.
 
 ## Scope

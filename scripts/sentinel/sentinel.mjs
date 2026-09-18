@@ -67,6 +67,15 @@ function loadInventory(repoRoot) {
   }
 }
 
+function hasHeartbeat(file, session) {
+  if (!existsSync(file)) return false
+  const needle = `"session":${JSON.stringify(session)}`
+  for (const line of readFileSync(file, 'utf8').split('\n')) {
+    if (line.includes(needle) && line.includes('"kind":"heartbeat"')) return true
+  }
+  return false
+}
+
 function slug(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'unknown'
 }
@@ -107,6 +116,12 @@ function main() {
     }
 
     if (input.hook_event_name !== 'PreToolUse') return
+    // A routine sets its git identity a few calls into its run, so its SessionStart heartbeat lands
+    // in the unconfigured ledger. When an identity first resolves for this session, write a
+    // heartbeat under it too, so the attester's cross-check finds one under the agent's own name.
+    if (input.session_id && !hasHeartbeat(ledgerFile, input.session_id)) {
+      append(ledgerFile, { ...base, event: 'IdentityResolved', kind: 'heartbeat', note: 'identity first resolved during this session' })
+    }
     const tool = input.tool_name
     const verdict = evaluate({ tool, input: input.tool_input || {}, identity, cwd, repoRoot, inventory })
     const target = tool === 'Bash' ? excerpt(input.tool_input?.command ?? '') : excerpt(input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? input.tool_input?.path ?? '')

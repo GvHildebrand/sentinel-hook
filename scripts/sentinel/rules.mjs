@@ -24,7 +24,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const SENTINEL_VERSION = '0.1.1'
+export const SENTINEL_VERSION = '0.2.0'
 
 /** Paths no agent may write, whatever the inventory says. Mirrors scripts/check-agent-scope.mjs. */
 export const RESERVED_PATHS = [
@@ -152,7 +152,7 @@ function decodeHexEscapes(s) {
 }
 
 export function normalizeCommand(cmd) {
-  let s = String(cmd)
+  let s = stripDataSegments(String(cmd)) // on the raw text: quotes and line breaks still mean something
   s = s.replace(/\\\r?\n/g, ' ') // line continuations
   s = decodeHexEscapes(s)
   s = s.replace(/\\(?=[A-Za-z])/g, '') // \rm -> rm
@@ -160,8 +160,60 @@ export function normalizeCommand(cmd) {
   s = s.replace(/["'`]/g, '') // dequote: exposes sh -c "..." and 'rm' to the same patterns
   s = s.replace(/\$\(\s*(printf|echo)\s+([^)]*)\)/g, '$2') // $(printf rm) -> rm
   s = s.replace(/\s+/g, ' ').trim()
+  // A base64 token is inert unless something in the same command decodes it; only then is what it
+  // decodes to part of what the command does. (`echo cm0gLXJmIH4=` alone prints a string.)
+  if (!/(base64 (-d|--decode|-D)\b|xxd -r|openssl (enc|base64) .*-d\b)/.test(s)) return s
   const decoded = decodeBase64Tokens(s)
   return decoded.length ? s + ' ' + decoded.join(' ') : s
+}
+
+/** A pipe sink that executes what it reads: a bare shell or interpreter (flags -s/-l/-i/- only), eval, source, xargs, a decoder. */
+const EXEC_SINK_RX = /^\s*(sudo\s+)?((sh|bash|zsh|python3?|node|perl|ruby)(\s+-[sli-]+)*\s*$|(eval|source|xargs|base64\s+(-d|--decode|-D))(\s|$))/
+const EXEC_WORD_RX = /^(sudo|sh|bash|zsh|python3?|node|perl|ruby|eval|source)$/
+const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** Does the text after a redirect run the file it wrote? `> c.sh; sh c.sh`, `chmod +x c.sh && ./c.sh`. */
+function targetExecuted(target, after) {
+  if (!target) return false
+  const t = esc(target.replace(/^['"]|['"]$/g, ''))
+  const rest = after.replace(/^\s*(>|>>)\s*\S+/, '') // the redirect itself is not an execution
+  return new RegExp(`(^|[\\s;&|(])(sh|bash|zsh|source|\\.|node|python3?|perl|ruby|chmod \\+x)\\s+${t}(\\s|$)|(^|[;&|]\\s*)(\\./)?${t}(\\s|$)`).test(rest)
+}
+
+/**
+ * Text that a command merely carries is not text it executes. `echo 'rm -rf ~'` prints a string;
+ * `echo 'rm -rf ~' | sh` runs it. The first day of live use produced two denials on commands that
+ * only quoted a dangerous string (a hook-input JSON piped to a script; a report written through a
+ * heredoc). So, on the RAW command — while quotes and line breaks still say what is data — the
+ * body of a heredoc and the argument of a leading `echo`/`printf` are replaced by `<data>`, unless
+ * that text reaches something that executes it: the heredoc feeds a shell or interpreter, the
+ * segment pipes into an executing sink, or the file it writes is run later in the same command.
+ */
+export function stripDataSegments(raw) {
+  let s = String(raw)
+  // 1. Heredocs. Header = the rest of the `<<TAG` line; body = the lines up to the terminator.
+  s = s.replace(/<<-?(['"]?)(\w+)\1([^\n]*)\n([\s\S]*?)\n[ \t]*\2(?=[ \t]*(?:\n|$))/g, (all, q, tag, header, body, offset, whole) => {
+    const before = whole.slice(0, offset)
+    const stmt = before.split(/[;&|]/).pop().trim()
+    const word = (stmt.match(/^(?:sudo\s+)?(\S+)/) || [])[1] || ''
+    const after = whole.slice(offset + all.length)
+    const target = (before + header).match(/(?:>|>>)\s*([^\s;&|]+)\s*$/)?.[1] ?? (before + header).match(/(?:>|>>)\s*([^\s;&|]+)/)?.[1]
+    const executes = EXEC_WORD_RX.test(word) || /\|\s*(sudo\s+)?(sh|bash|zsh|python3?|node|perl|ruby|eval|source|xargs)\b/.test(header) || targetExecuted(target, after)
+    return executes ? all : `<<${q}${tag}${q}${header}\nDATA\n${tag}`
+  })
+  // 2. A leading echo/printf (a statement's first word, never inside `$( )`): its argument run
+  //    (quoted strings and bare words) up to an unquoted `|`, `;`, `&`, `>` or end, then the sink.
+  //    An argument holding a command substitution is executed, not carried, and is left alone.
+  s = s.replace(/(^|[;&|]\s*)((?:sudo\s+)?(?:echo|printf)\s+)((?:'[^']*'|"(?:[^"\\]|\\.)*"|[^\s|;&>'"()]+)(?:\s+(?:'[^']*'|"(?:[^"\\]|\\.)*"|[^\s|;&>'"()]+))*)(?=\s*($|[|;&>]))/g, (all, lead, cmd, args, next, offset, whole) => {
+    if (/\$\(|`/.test(args)) return all
+    const after = whole.slice(offset + all.length)
+    const sink = after.match(/^\s*\|\s*([^|;&]*)/)?.[1]
+    if (sink && EXEC_SINK_RX.test(sink)) return all
+    const target = after.match(/^\s*(?:>|>>)\s*([^\s;&|]+)/)?.[1]
+    if (targetExecuted(target, after)) return all
+    return `${lead}${cmd}'DATA'`
+  })
+  return s
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -297,7 +349,20 @@ const BASH_RULES = [
   {
     id: 'B10.remote-code-execution',
     test(s) {
-      if (/(^|[\s;&|(])(curl|wget) [^|]*\| ?(sudo )?(sh|bash|zsh|python3?|node|perl|ruby)\b/.test(s)) return { reason: 'downloads and executes code in one step', severity: 'high', agent: 'deny', person: 'ask' }
+      // A download piped into something that EXECUTES the stream: a bare shell (or one reading
+      // stdin with -s), or an interpreter with no inline program and no script file. `| node -e "…"`
+      // and `| python3 parse.py` read stdin as data; the first day of live use produced four false
+      // positives on exactly that shape.
+      const m = s.match(/(^|[\s;&|(])(curl|wget) [^|]*\| ?(sudo )?(sh|bash|zsh|python3?|node|perl|ruby)\b([^|;&]*)/)
+      if (m) {
+        const interp = m[4]
+        const rest = m[5].replace(/\s#.*$/, '').replace(/^#.*$/, '').trim() // a trailing comment is not a script file
+        const inlineProgram = /^(-[a-zA-Z]+\s+)*(-e|-c)\b/.test(rest)
+        const scriptFile = rest !== '' && !rest.startsWith('-')
+        const executesStdin = !inlineProgram && !scriptFile
+        if (executesStdin) return { reason: 'downloads and executes code in one step', severity: 'high', agent: 'deny', person: 'ask' }
+        void interp
+      }
       if (/(^|[\s;&|(])(sh|bash|zsh) <\( ?(curl|wget)/.test(s)) return { reason: 'downloads and executes code in one step', severity: 'high', agent: 'deny', person: 'ask' }
       return false
     },
@@ -348,7 +413,13 @@ const BASH_RULES = [
       if (ctx.identity.kind !== 'agent') return false
       const mentionsReserved = RESERVED_PATHS.some((p) => s.includes(p.replace(/\/$/, '')))
       if (!mentionsReserved) return false
-      if (/(>|>>|(^|[\s;&|(])(tee|sed -i|cp|mv|rm|truncate|git (checkout|restore) --|chmod|chown|ln -s?f?)\b)/.test(s)) return { reason: 'mutates a reserved path from a shell command', severity: 'high', agent: 'deny', person: 'allow' }
+      // The mutating verb must be a statement's command word, not a word inside an argument
+      // (`grep -n 'rm -rf' scripts/sentinel/corpus.json` mutates nothing); and for cp/mv the
+      // reserved path must be the destination, the last operand.
+      const reservedAlt = RESERVED_PATHS.map((p) => esc(p.replace(/\/$/, ''))).join('|')
+      if (new RegExp(`(>|>>)\\s*\\S*(${reservedAlt})`).test(s)) return { reason: 'mutates a reserved path from a shell command', severity: 'high', agent: 'deny', person: 'allow' }
+      if (new RegExp(`(^|[;&|(]\\s*)(sudo )?(tee|sed -i|rm|truncate|chmod|chown|ln -s?f?|git (checkout|restore) --)\\b[^;&|]*(${reservedAlt})`).test(s)) return { reason: 'mutates a reserved path from a shell command', severity: 'high', agent: 'deny', person: 'allow' }
+      if (new RegExp(`(^|[;&|(]\\s*)(sudo )?(cp|mv)\\b[^;&|]*\\s\\S*(${reservedAlt})\\S*\\s*($|[;&|])`).test(s)) return { reason: 'mutates a reserved path from a shell command', severity: 'high', agent: 'deny', person: 'allow' }
       return false
     },
   },
@@ -356,7 +427,10 @@ const BASH_RULES = [
     id: 'B16.persistence-mutation',
     test(s) {
       if (/(^|[\s;&|(])crontab( -e\b| [^-\s])/.test(s)) return { reason: 'installs a scheduled job', severity: 'high', agent: 'deny', person: 'ask' }
-      const persist = /(\.(zshrc|zprofile|bashrc|bash_profile|profile|zshenv)|\.gitconfig|\.claude\/settings(\.local)?\.json|authorized_keys|LaunchAgents|LaunchDaemons|\/etc\/(hosts|profile|sudoers|cron))/
+      // Anchored to the home directory or the system: the project's own `.claude/settings.json` is a
+      // reserved path (W01/B15), not a persistence location, and matching it here produced six false
+      // positives on the first day of live use.
+      const persist = /((~|\$HOME|\$\{HOME\}|\/Users\/[^\s/]+|\/home\/[^\s/]+|\/root)\/(\.(zshrc|zprofile|bashrc|bash_profile|profile|zshenv)|\.gitconfig|\.claude\/(settings(\.local)?\.json|CLAUDE\.md)|\.ssh\/authorized_keys|Library\/(LaunchAgents|LaunchDaemons))|\/etc\/(hosts|profile|sudoers|cron|systemd)|^\/Library\/(LaunchAgents|LaunchDaemons))/
       if (!persist.test(s)) return false
       if (/(>|>>|(^|[\s;&|(])(tee|sed -i|cp|mv|ln|launchctl (load|bootstrap)|defaults write)\b)/.test(s)) return { reason: 'writes to a persistence location', severity: 'high', agent: 'deny', person: 'ask' }
       return false
