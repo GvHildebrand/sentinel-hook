@@ -24,7 +24,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const SENTINEL_VERSION = '0.2.0'
+export const SENTINEL_VERSION = '0.3.0'
 
 /** Paths no agent may write, whatever the inventory says. Mirrors scripts/check-agent-scope.mjs. */
 export const RESERVED_PATHS = [
@@ -69,6 +69,28 @@ export const PERSISTENCE_PATH_RX = [
   /(^|\/)\.config\/systemd\//,
   /(^|\/)crontab$/,
 ]
+
+
+/**
+ * An agent's own persona, memory, heartbeat, identity, skill or configuration files, outside any
+ * repository. The Moltbook corpus (2026-09) showed 478 injection payloads asking a reading agent to
+ * rewrite exactly these, and 1,508 redirecting remote content into a skills directory; 0.2.0 recorded
+ * every one as a write outside the repository and let it through, because a repository was the only
+ * scope it knew. A memory file is where an injection stops being a post and becomes a habit.
+ */
+export const AGENT_SELF_DIR_RX = /(^|\/)\.(openclaw|moltbot|clawdbot|claude|codex|cursor|gemini|aider(-chat)?|continue|cline|windsurf|copilot|agents?)\//
+export const AGENT_SELF_FILE_RX = /(^|\/)(SOUL|MEMORY|HEARTBEAT|AGENTS|CLAUDE|IDENTITY|PERSONA|SYSTEM_PROMPT|SKILL|soul|memory|heartbeat|identity|persona|skill)\.(md|json|ya?ml|toml|txt)$/
+export const AGENT_SKILLS_DIR_RX = /(^|\/)skills\/[^/]+\/[^/]+$/
+const HOME_PREFIX_RX = /^(\/Users\/[^/]+|\/home\/[^/]+|\/root)(\/|$)/
+
+/** True for a path under a home directory that is an agent's own persona, memory, heartbeat, skill or runtime-config file. */
+export function isAgentSelfPath(p) {
+  const s = expandHome(p)
+  const home = process.env.HOME || ''
+  const underHome = (home && (s === home || s.startsWith(home + '/'))) || HOME_PREFIX_RX.test(s)
+  if (!underHome) return false
+  return AGENT_SELF_DIR_RX.test(s) || AGENT_SELF_FILE_RX.test(s) || AGENT_SKILLS_DIR_RX.test(s)
+}
 
 // ---------------------------------------------------------------------------------------------
 // Path helpers
@@ -436,6 +458,24 @@ const BASH_RULES = [
       return false
     },
   },
+  {
+    id: 'B17.agent-self-mutation',
+    // A shell write into the agent's own persona, memory, heartbeat, skill or runtime-config file
+    // outside the repository: a redirect, tee, sed -i, or a cp/mv whose destination it is. When the
+    // segment also downloads (curl/wget), the content comes from the network: a skill installed by
+    // redirect, which B10 does not see because nothing executes in the same command.
+    test(s, ctx) {
+      const self = '((?:~|\\$HOME|\\$\\{HOME\\}|/Users/[^\\s/]+|/home/[^\\s/]+|/root)/\\S*(?:\\.(?:openclaw|moltbot|clawdbot|claude|codex|cursor|gemini|aider(?:-chat)?|continue|cline|windsurf|copilot|agents?)/|skills/[^\\s/]+/|(?:SOUL|MEMORY|HEARTBEAT|AGENTS|CLAUDE|IDENTITY|PERSONA|SYSTEM_PROMPT|SKILL|soul|memory|heartbeat|identity|persona|skill)\\.(?:md|json|ya?ml|toml|txt))\\S*)'
+      const hit = new RegExp(`(?:>|>>)\\s*${self}`).exec(s) || new RegExp(`(?:^|[;&|(]\\s*)(?:sudo )?(?:tee(?: -a)?|sed -i(?: -e)?[^;&|]*?)\\s${self}`).exec(s) || new RegExp(`(?:^|[;&|(]\\s*)(?:sudo )?(?:cp|mv)\\b[^;&|]*\\s${self}\\s*(?:$|[;&|])`).exec(s)
+      if (!hit) return false
+      const target = hit[1]
+      if (target && /\.claude\/settings(\.local)?\.json$/.test(target)) return false // B16's, not this rule's
+      if (ctx.repoRoot && locate(target, ctx.cwd, ctx.repoRoot).inRepo) return false
+      const seg = s.slice(0, hit.index + hit[0].length).split(/[;&]/).pop()
+      if (/(^|[\s|(])(curl|wget)\s/.test(seg)) return { reason: "writes remote content into the agent's own skill, persona or memory file", severity: 'high', agent: 'deny', person: 'ask' }
+      return { reason: "mutates the agent's own persona, memory, heartbeat or skill file from a shell", severity: 'high', agent: 'deny', person: 'ask' }
+    },
+  },
 ]
 
 function egressHosts(s) {
@@ -480,6 +520,22 @@ export function evaluate(ctx) {
     }
     const hosts = egressHosts(s)
     if (hosts.length) findings.push({ rule: 'E01.egress', note: hosts.join(',') })
+    // E02: egress outside a declared allowlist. Inert unless the inventory declares one: `_egress_allow`
+    // for everyone, `egress_allow` on an agent. A suffix matches its subdomains; loopback is always allowed.
+    // The Moltbook corpus sent 3,833 calls to one third-party host; a host-side gate cannot know it
+    // is hostile, but an operator can say which hosts an agent has any business reaching.
+    if (hosts.length) {
+      const rec = ctx.identity.kind === 'agent' ? ctx.inventory?.agents?.find((a) => a.id === ctx.identity.agent) : null
+      const allow = [...(ctx.inventory?._egress_allow ?? []), ...(rec?.egress_allow ?? [])].map((h) => String(h).toLowerCase())
+      if (allow.length) {
+        const ok = (h) => {
+          const bare = h.replace(/:\d+$/, '')
+          return /^(localhost|127\.0\.0\.1|\[?::1\]?)$/.test(bare) || allow.some((a) => bare === a || bare.endsWith('.' + a))
+        }
+        const bad = hosts.filter((h) => !ok(h))
+        if (bad.length) raise('E02.egress-not-allowlisted', { reason: `reaches ${bad.join(',')}, not in the declared egress allowlist`, severity: 'high', agent: 'deny', person: 'ask' })
+      }
+    }
     return { ...best, findings }
   }
 
@@ -508,6 +564,9 @@ export function evaluate(ctx) {
         raise('W02.out-of-scope', { reason: `not in ${ctx.identity.agent}'s declared writes`, severity: 'high', agent: 'deny', person: 'allow' })
       }
     }
+  }
+  if (isWrite && !loc.inRepo && isAgentSelfPath(loc.abs)) {
+    raise('W06.agent-self-write', { reason: "writes the agent's own persona, memory, heartbeat or skill file outside the repository", severity: 'high', agent: 'deny', person: 'ask' })
   }
   if (isWrite && !loc.inRepo) findings.push({ rule: 'W05.outside-repo', note: 'write outside the repository' })
   return { ...best, findings }

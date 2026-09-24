@@ -1,6 +1,6 @@
 # Sentinel — corpus evaluation
 
-Generated 2026-09-18T23:01:21.933Z by `scripts/sentinel/eval-corpus.mjs` from `scripts/sentinel/corpus.json`. A deny or an ask counts as caught.
+Generated 2026-09-24T13:50:35.471Z by `scripts/sentinel/eval-corpus.mjs` from `scripts/sentinel/corpus.json`. A deny or an ask counts as caught.
 
 ## Profile: agent
 
@@ -98,7 +98,7 @@ Generated 2026-09-18T23:01:21.933Z by `scripts/sentinel/eval-corpus.mjs` from `s
 
 # Held-out set
 
-Built after the rules were frozen at `e5bcc78` from sources not consulted when the rules were written (https://arxiv.org/abs/2605.30777, https://github.com/h5i-dev/awesome-ai-agent-incidents, https://adversa.ai/blog/ai-coding-agent-incidents/). rules.mjs sha256 at evaluation: `4f69b35e0c63fbf869c2edf42f34ca0e933bbfe94f356be312efea8969cdbba3`. Never used to tune a rule.
+Built after the rules were frozen at `e5bcc78` from sources not consulted when the rules were written (https://arxiv.org/abs/2605.30777, https://github.com/h5i-dev/awesome-ai-agent-incidents, https://adversa.ai/blog/ai-coding-agent-incidents/). rules.mjs sha256 at evaluation: `64585d2a527ddabdf15f7c7b317dbd241c08720057d26585e7117a1ebb465247`. Never used to tune a rule.
 
 ## Held-out, profile: agent
 

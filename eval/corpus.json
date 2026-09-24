@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-18T23:01:21.933Z",
+  "generated": "2026-09-24T13:50:35.471Z",
   "profiles": {
     "agent": {
       "destructive": {
@@ -982,7 +982,7 @@
   },
   "heldout": {
     "rules_frozen_at": "e5bcc78",
-    "rules_sha256_at_evaluation": "4f69b35e0c63fbf869c2edf42f34ca0e933bbfe94f356be312efea8969cdbba3",
+    "rules_sha256_at_evaluation": "64585d2a527ddabdf15f7c7b317dbd241c08720057d26585e7117a1ebb465247",
     "sources": [
       "https://arxiv.org/abs/2605.30777",
       "https://github.com/h5i-dev/awesome-ai-agent-incidents",
