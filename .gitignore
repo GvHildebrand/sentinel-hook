@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+# a local witness run (node witness-server/server.mjs) keeps its key and data here
+data/
+*.tgz

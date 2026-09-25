@@ -3,6 +3,43 @@
 The short version is in the paper (`paper/vigilia-sentinel-2026.pdf`, sections 4 and 5). This is the
 operator's version.
 
+## Two modes (0.4.0)
+
+One package, one repository, two entry points:
+
+| | Witness (default) | Gate (`init --gate`) |
+|---|---|---|
+| Entry point | `scripts/sentinel/witness.mjs` | `scripts/sentinel/sentinel.mjs` + `rules.mjs` |
+| Hooks | `SessionStart`, `SubagentStart`, `PreToolUse` on every tool (`*`), `SessionEnd` | the same events; `PreToolUse` on `Bash\|Write\|Edit\|MultiEdit\|NotebookEdit\|Read` |
+| Decides | never: no deny, no ask, no allow; prints nothing | allow, ask or deny, by the rules below |
+| Can block real work | no | **yes** — a denied call does not run, and the rules are sometimes wrong |
+| Record | `~/.vigilia/ledger/witness.jsonl` | the same file, with the decision on each line |
+| Sealed to the witness | yes | yes |
+| Near-misses | never produced | opt-in (`near-miss --auto on`): a category and a line hash |
+
+The witness exists because a gate asks something of its user: accept that a deterministic rule set
+will sometimes stop legitimate work. Most people who want a trustworthy record of what their agent did
+do not want that, so the record comes first and the gate is a choice. How the witness works, what a
+seal proves and what it does not: [witness.md](witness.md). What leaves the machine: [privacy.md](privacy.md).
+
+The rest of this page is about the gate.
+
+## Two ways to run the gate
+
+- **Installed** — `npx @vigilia/sentinel-hook init --gate`. The runtime is copied to
+  `~/.vigilia/sentinel-hook/<version>/`, the hooks go into `~/.claude/settings.json` (or the
+  project's, with `--project`), and the hook is invoked with `--agent claude-code`. It writes one chain
+  per install to `~/.vigilia/ledger/witness.jsonl`, never into your repository, and seals it.
+- **From a repository checkout** — how Vigilia's own fleet runs it, and how 0.3.0 was installed: copy
+  `scripts/sentinel/` into the repository and `templates/claude-settings.json` to
+  `.claude/settings.json`. Without `--agent` the gate behaves exactly as 0.3.0 did: one ledger per
+  identity under `research/sentinel/ledger/`, sealed by `templates/sentinel-attest.yml`, no witness.
+  Try it by hand:
+
+  ```bash
+  echo '{"hook_event_name":"PreToolUse","session_id":"s","cwd":"'$PWD'","tool_name":"Bash","tool_input":{"command":"rm -rf ~"}}' | node scripts/sentinel/sentinel.mjs
+  ```
+
 ## Where it runs
 
 Claude Code lets a project register hooks in `.claude/settings.json`. The sentinel registers three:
@@ -108,7 +145,12 @@ authors had never opened; both numbers are in the paper.
 
 ## The ledger
 
-One JSONL file per identity under `research/sentinel/ledger/`, **at the nearest `.git` above the
+Installed with the CLI: one file, `~/.vigilia/ledger/witness.jsonl`, for every identity and session on
+the machine; each line also carries `seq`, a random `nonce`, `agent`, `transcript_path` and
+`input_sha256` ([witness.md](witness.md#the-line)). Appends are locked, so parallel sessions and
+subagents cannot fork the chain.
+
+From a repository checkout: one JSONL file per identity under `research/sentinel/ledger/`, **at the nearest `.git` above the
 session's working directory** — so a project nested inside another repository writes into the outer
 one. `VIGILIA_SENTINEL_LEDGER_DIR` overrides the location; with no `.git` anywhere above, the
 fallback is `~/.vigilia-sentinel/`. The file is named after the identity: `<agent-id>.jsonl` for a
@@ -123,7 +165,8 @@ in `ledger.mjs` walks the chain and reports the first broken line.
 
 ## The seal
 
-`templates/sentinel-attest.yml` runs on every push that changes a ledger and once a day. It
+Installed, the chain head is sealed with the witness ([witness.md](witness.md)). From a repository
+checkout, `templates/sentinel-attest.yml` runs on every push that changes a ledger and once a day. It
 verifies every chain, writes a manifest of the chain heads, signs it keylessly with cosign (the
 signature and the workflow's OIDC identity are entered in the Sigstore Rekor transparency log),
 requests an RFC 3161 timestamp for the same manifest from DigiCert's public authority, and commits

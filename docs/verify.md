@@ -1,5 +1,11 @@
 # Verifying a sealed record
 
+This page is about records sealed by the attestation workflow (`templates/sentinel-attest.yml`), the
+way a repository checkout of the gate is sealed. An install made with `npx @vigilia/sentinel-hook init`
+is sealed with the witness instead: `npx @vigilia/sentinel-hook verify` checks it, and
+[witness.md](witness.md#checking-it-yourself) says how a third party can. The witness's own chain head
+is sealed the same way as below, by `templates/witness-mirror.yml`.
+
 Every attestation is four files under `research/sentinel/attestations/`, sharing a stamp:
 
 - `<stamp>.json` — the attestation: the manifest, the Rekor log index and integrated time, the RFC 3161
