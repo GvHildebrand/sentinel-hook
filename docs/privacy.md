@@ -1,8 +1,6 @@
 # Privacy — sentinel-hook and the Vigilia witness
 
-> **DRAFT, pre-launch.** This note describes sentinel-hook 0.4.0 as written. The witness server is not
-> yet running, and the hosting details below are the plan, not a fact yet. This text will live at
-> https://aivigilia.com/witness/privacy once the witness is live.
+> Also published at https://aivigilia.com/witness/privacy. Last updated 25 September 2026.
 
 ## What leaves your machine
 
@@ -42,7 +40,7 @@ and delete it.
 - Its own hash chain, which lists per entry only a position, a time (to the second), and hashes. It
   says nothing about any install and is **public**.
 - Hosting: a server in **Geneva, Switzerland, on Infomaniak** infrastructure, with backups on
-  Infomaniak object storage in Switzerland. *(Pre-launch: not yet deployed.)*
+  Infomaniak object storage in Switzerland.
 
 Once in a while, one combined fingerprint of the witness's whole chain (the chain head) is also
 **mirrored publicly**, to a GitHub repository and the Sigstore Rekor transparency log, so that no

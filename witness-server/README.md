@@ -57,8 +57,10 @@ but the mirror's pinned key must be changed by a person, on the record. Back it 
 
 ## Deploy note: a small Infomaniak VM in Geneva
 
-Pre-launch. Every Infomaniak-specific detail below is marked **check at deploy time**: it was written
-from documentation, not from a deployment.
+Deployed 2026-09-25 as below on witness-1 (Infomaniak Public Cloud, region dc3-a, Geneva; Debian 12, Node 22,
+Caddy 2.6, hourly rclone copy to s3.pub1.infomaniak.cloud). The "check at deploy time" notes were checked then:
+identity endpoint https://api.pub1.infomaniak.cloud/identity/v3, S3 endpoint and region as written, and S3 keys
+come from `openstack ec2 credentials create` (Horizon here shows no EC2 tab).
 
 1. **The VM.** A small instance in Infomaniak's Public Cloud, in a Geneva region (1 vCPU and 1–2 GB is
    plenty; Debian or Ubuntu LTS). *Check at deploy time: the flavour names, and which region code is

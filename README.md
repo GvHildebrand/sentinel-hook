@@ -6,13 +6,7 @@ It seals a fingerprint of every action your agent takes, as it happens. If somet
 
 It works with Claude Code, observes and never decides; an opt-in gate can allow, ask or deny instead. The record stays on your machine; only its fingerprint goes to the witness in Geneva.
 
-<!-- PRE-LAUNCH. Written as it will read at launch. Not live yet:
-  - the npm package @vigilia/sentinel-hook is not published (from a clone: node bin/cli.mjs <command>);
-  - the witness at https://witness.aivigilia.com is not deployed (seals fail open and wait; to try it,
-    run witness-server/ locally and pass --witness-url http://127.0.0.1:8787);
-  - the privacy page https://aivigilia.com/witness/privacy is not up (the draft is docs/privacy.md);
-  - the repository has not moved to github.com/aivigilia/sentinel-hook yet (it is GvHildebrand/sentinel-hook).
--->
+<!-- Until the npm package is published, run from a clone: node bin/cli.mjs <command>. -->
 
 ## Quickstart
 
