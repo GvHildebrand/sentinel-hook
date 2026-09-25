@@ -45,8 +45,9 @@ and delete it.
   Infomaniak object storage in Switzerland. *(Pre-launch: not yet deployed.)*
 
 Once in a while, one combined fingerprint of the witness's whole chain (the chain head) is also
-**mirrored publicly** — to a GitHub repository, to the Sigstore Rekor transparency log, and to Zenodo —
-so that no single host, including us, can rewrite the history afterwards.
+**mirrored publicly**, to a GitHub repository and the Sigstore Rekor transparency log, so that no
+single host, including us, can rewrite the history afterwards. Periodic snapshots to Zenodo are
+planned and not running yet.
 
 **IP addresses.** The server sees your IP address because that is how a reply reaches you. It uses it
 in memory to limit how often one address can call, and never writes it anywhere — not to disk, not to
