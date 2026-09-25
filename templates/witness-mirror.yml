@@ -1,0 +1,115 @@
+name: witness mirror
+
+# "No host can rewrite history" — including the witness's own.
+#
+# The witness (witness-server/) keeps a public hash chain of every seal it accepts: per entry only
+# { i, t, leaf, prev, hash, sig }, signed with the witness's ed25519 key. A chain the witness alone
+# holds rests on the witness's word, which is the very thing a witness exists to replace. So this job
+# copies the chain head somewhere the witness does not control, every six hours:
+#
+#   1. fetch /v1/head and check it: the entry hash recomputes, the witness signed it, the key is the
+#      pinned one (repository variable WITNESS_SERVER_PUB), and the entry mirrored last time is
+#      still at the same position with the same hash (/v1/chain) — a rewritten history fails here;
+#   2. commit the head to witness/heads/;
+#   3. sign it keylessly with cosign (Sigstore Rekor, under this workflow's OIDC identity) and get an
+#      RFC 3161 timestamp from an independent authority, as templates/sentinel-attest.yml does.
+#
+# TEMPLATE ONLY. Copy to .github/workflows/ in the repository that keeps the mirror. It needs
+# `id-token: write` for keyless signing, and the variables WITNESS_URL (default below) and
+# WITNESS_SERVER_PUB (the witness's raw public key, base64url, as /v1/head reports it).
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: witness-mirror
+  cancel-in-progress: false
+
+env:
+  WITNESS_URL: ${{ vars.WITNESS_URL || 'https://witness.aivigilia.com' }}
+  WITNESS_SERVER_PUB: ${{ vars.WITNESS_SERVER_PUB }}
+
+jobs:
+  mirror:
+    name: Mirror and seal the witness head
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Fetch and check the head
+        id: head
+        run: |
+          mkdir -p witness/heads
+          STAMP=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+          curl -fsS --max-time 30 "$WITNESS_URL/v1/head" > "$RUNNER_TEMP/head.json"
+          node --input-type=module - "$RUNNER_TEMP/head.json" witness/head.json <<'EOF'
+          import { createHash, createPublicKey, verify } from 'node:crypto'
+          import { existsSync, readFileSync } from 'node:fs'
+          const [file, lastFile] = process.argv.slice(2)
+          const h = JSON.parse(readFileSync(file, 'utf8'))
+          if (h.empty) { console.log('The witness chain is empty; nothing to mirror.'); process.exit(0) }
+          const canonical = (o) => '{' + Object.keys(o).sort().map((k) => JSON.stringify(k) + ':' + JSON.stringify(o[k])).join(',') + '}'
+          const hash = createHash('sha256').update(canonical({ i: h.i, t: h.t, leaf: h.leaf, prev: h.prev })).digest('hex')
+          if (hash !== h.hash) throw new Error('head hash does not recompute')
+          const pinned = process.env.WITNESS_SERVER_PUB
+          if (pinned && pinned !== h.server_pub) throw new Error(`witness key changed: ${h.server_pub} is not the pinned ${pinned}`)
+          const key = createPublicKey({ key: { kty: 'OKP', crv: 'Ed25519', x: h.server_pub }, format: 'jwk' })
+          if (!verify(null, Buffer.from(h.hash), key, Buffer.from(h.sig, 'base64url'))) throw new Error('witness signature does not verify')
+          if (existsSync(lastFile)) {
+            const last = JSON.parse(readFileSync(lastFile, 'utf8'))
+            if (h.i < last.i) throw new Error(`the chain got shorter: ${h.i} < ${last.i}`)
+            const r = await fetch(`${process.env.WITNESS_URL}/v1/chain?from=${last.i}&to=${last.i + 1}`)
+            const { entries } = await r.json()
+            if (!entries?.length || entries[0].hash !== last.hash) throw new Error(`entry ${last.i} changed since it was mirrored`)
+          }
+          console.log(`Head ${h.i} ${h.hash} at ${h.t}: verified.`)
+          EOF
+          if grep -q '"empty"' "$RUNNER_TEMP/head.json"; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ -f witness/head.json ] && cmp -s "$RUNNER_TEMP/head.json" witness/head.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          cp "$RUNNER_TEMP/head.json" witness/head.json
+          cp "$RUNNER_TEMP/head.json" "witness/heads/$STAMP.json"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Sign into the transparency log (Sigstore, keyless)
+        if: steps.head.outputs.changed == 'true'
+        run: cosign sign-blob "witness/heads/${{ steps.head.outputs.stamp }}.json" --bundle "witness/heads/${{ steps.head.outputs.stamp }}.sigstore.json" --yes
+
+      - name: Timestamp with an independent authority (RFC 3161)
+        if: steps.head.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          F="witness/heads/${{ steps.head.outputs.stamp }}"
+          openssl ts -query -data "$F.json" -sha256 -cert -out "$RUNNER_TEMP/head.tsq"
+          curl -sS --max-time 30 -H 'Content-Type: application/timestamp-query' \
+            --data-binary @"$RUNNER_TEMP/head.tsq" http://timestamp.digicert.com > "$F.tsr"
+          openssl ts -reply -in "$F.tsr" -text | grep -E 'Time stamp|TSA' || true
+
+      - name: Commit and push
+        if: steps.head.outputs.changed == 'true'
+        run: |
+          git config user.name Vigilia
+          git config user.email witness-mirror@aivigilia.com
+          git add witness
+          git commit -q -m "[VIGILIA-WITNESS] mirrored head ${{ steps.head.outputs.stamp }}" -m "The witness chain head, checked (hash, signature, pinned key, no rewrite of the last mirrored entry), signed into Rekor and timestamped (RFC 3161)." -m "Vigilia-Agent: witness-mirror"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase -q origin main && git push -q origin HEAD:main; then exit 0; fi
+            sleep $((i * 5))
+          done
+          echo "Could not push after five attempts." >&2
+          exit 1

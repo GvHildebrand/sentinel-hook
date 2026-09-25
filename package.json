@@ -1,15 +1,60 @@
 {
-  "name": "sentinel-hook",
-  "version": "0.3.0",
-  "description": "A pre-action gate for Claude Code agents with a hash-chained ledger sealed into Sigstore Rekor and an RFC 3161 timestamp.",
+  "name": "@vigilia/sentinel-hook",
+  "version": "0.4.0",
+  "description": "A free Swiss witness for your coding agent: a local hash-chained record of every Claude Code tool call, its fingerprint sealed with an independent witness. Optional allow/ask/deny gate.",
   "type": "module",
-  "private": true,
+  "bin": {
+    "sentinel-hook": "bin/cli.mjs"
+  },
+  "files": [
+    "bin/cli.mjs",
+    "scripts/sentinel/witness.mjs",
+    "scripts/sentinel/sentinel.mjs",
+    "scripts/sentinel/rules.mjs",
+    "scripts/sentinel/ledger.mjs",
+    "scripts/sentinel/home.mjs",
+    "scripts/sentinel/keys.mjs",
+    "scripts/sentinel/trigger.mjs",
+    "scripts/sentinel/flush.mjs",
+    "scripts/sentinel/witness-client.mjs",
+    "scripts/sentinel/install.mjs",
+    "templates/claude-settings.json",
+    "templates/agents.json",
+    "templates/sentinel-attest.yml",
+    "templates/witness-mirror.yml"
+  ],
   "scripts": {
-    "test": "node --test scripts/sentinel/test.mjs",
+    "test": "node --test scripts/sentinel/test.mjs scripts/sentinel/test-0.3.mjs scripts/sentinel/test-witness.mjs scripts/sentinel/test-privacy.mjs scripts/sentinel/test-e2e.mjs witness-server/test.mjs",
     "eval": "node scripts/sentinel/eval-corpus.mjs",
     "replay": "node scripts/sentinel/replay.mjs",
-    "figures": "node scripts/sentinel/figures.mjs"
+    "figures": "node scripts/sentinel/figures.mjs",
+    "witness": "node witness-server/server.mjs"
+  },
+  "keywords": [
+    "claude-code",
+    "hooks",
+    "ai-agents",
+    "coding-agent",
+    "audit-log",
+    "transparency-log",
+    "witness",
+    "hash-chain",
+    "ed25519",
+    "ai-safety"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aivigilia/sentinel-hook.git"
+  },
+  "homepage": "https://github.com/aivigilia/sentinel-hook#readme",
+  "bugs": {
+    "url": "https://github.com/aivigilia/sentinel-hook/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
