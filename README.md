@@ -1,6 +1,10 @@
 # sentinel-hook
 
-A free Swiss witness for your coding agent. It keeps a hash-chained record of every Claude Code tool call on your machine and sends only a fingerprint of it to an independent witness, so the record cannot be rewritten or backfilled later without it showing. It observes; it does not decide. An opt-in gate can allow, ask or deny instead.
+**A free Swiss witness for your coding agent.**
+
+It seals a fingerprint of every action your agent takes, as it happens. If something goes wrong, you can show exactly what your agent did, and anyone can check that the record hasn't been touched since.
+
+It works with Claude Code, observes and never decides; an opt-in gate can allow, ask or deny instead. The record stays on your machine; only its fingerprint goes to the witness in Geneva.
 
 <!-- PRE-LAUNCH. Written as it will read at launch. Not live yet:
   - the npm package @vigilia/sentinel-hook is not published (from a clone: node bin/cli.mjs <command>);
@@ -18,7 +22,7 @@ npx @vigilia/sentinel-hook init
 
 That witnesses every Claude Code session on this machine: it adds its hooks to `~/.claude/settings.json` (backed up first; your other hooks are left alone) and keeps the record in `~/.vigilia/ledger/witness.jsonl`. Needs Node 20 or later. Nothing to configure.
 
-**What leaves your machine:** a fingerprint of your record, a count, a timestamp and a signature. Never your code, commands, prompts, file paths or repository names. [docs/privacy.md](docs/privacy.md)
+**What leaves your machine:** your code, commands and prompts never leave it. Only a fingerprint, a count, the time and a signature do. Never file paths or repository names either. [docs/privacy.md](docs/privacy.md)
 
 ```bash
 npx @vigilia/sentinel-hook status      # mode, lines recorded, chain verified, last seal
